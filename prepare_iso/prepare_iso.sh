@@ -1,9 +1,9 @@
 #!/bin/sh -e
 #
 # Preparation script for an OS X automated installation for use with VeeWee/Packer/Vagrant
-# 
+#
 # What the script does, in more detail:
-# 
+#
 # 1. Mounts the InstallESD.dmg using a shadow file, so the original DMG is left
 #    unchanged.
 # 2. Modifies the BaseSystem.dmg within in order to add an additional 'rc.cdrom.local'
@@ -184,7 +184,7 @@ MNT_ESD=$(/usr/bin/mktemp -d /tmp/veewee-osx-esd.XXXX)
 SHADOW_FILE=$(/usr/bin/mktemp /tmp/veewee-osx-shadow.XXXX)
 rm "$SHADOW_FILE"
 msg_status "Attaching input OS X installer image with shadow file.."
-hdiutil attach "$ESD" -mountpoint "$MNT_ESD" -shadow "$SHADOW_FILE" -nobrowse -owners on 
+hdiutil attach "$ESD" -mountpoint "$MNT_ESD" -shadow "$SHADOW_FILE" -nobrowse -owners on
 if [ $? -ne 0 ]; then
 	[ ! -e "$ESD" ] && msg_error "Could not find $ESD in $(pwd)"
 	msg_error "Could not mount $ESD on $MNT_ESD"
@@ -194,7 +194,14 @@ fi
 msg_status "Mounting BaseSystem.."
 BASE_SYSTEM_DMG="$MNT_ESD/BaseSystem.dmg"
 MNT_BASE_SYSTEM=$(/usr/bin/mktemp -d /tmp/veewee-osx-basesystem.XXXX)
-[ ! -e "$BASE_SYSTEM_DMG" ] && msg_error "Could not find BaseSystem.dmg in $MNT_ESD"
+if [ ! -e "$BASE_SYSTEM_DMG" ]; then
+    BASE_ESD="$(dirname "$ESD")/BaseSystem.dmg"
+    if [ -e "$BASE_ESD" ]; then
+        cp "$BASE_ESD" "$BASE_SYSTEM_DMG"
+    else
+        msg_error "Could not find BaseSystem.dmg in $MNT_ESD"
+    fi
+fi
 hdiutil attach "$BASE_SYSTEM_DMG" -mountpoint "$MNT_BASE_SYSTEM" -nobrowse -owners on
 if [ $? -ne 0 ]; then
 	msg_error "Could not mount $BASE_SYSTEM_DMG on $MNT_BASE_SYSTEM"
