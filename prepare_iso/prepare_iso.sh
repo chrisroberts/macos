@@ -196,8 +196,12 @@ BASE_SYSTEM_DMG="$MNT_ESD/BaseSystem.dmg"
 MNT_BASE_SYSTEM=$(/usr/bin/mktemp -d /tmp/veewee-osx-basesystem.XXXX)
 if [ ! -e "$BASE_SYSTEM_DMG" ]; then
     BASE_ESD="$(dirname "$ESD")/BaseSystem.dmg"
+    BASE_CHUNK="$(dirname "$ESD")/BaseSystem.chunklist"
     if [ -e "$BASE_ESD" ]; then
         cp "$BASE_ESD" "$BASE_SYSTEM_DMG"
+        if [ -e "$BASE_CHUNK" ]; then
+            cp "$BASE_CHUNK" "$(dirname "$BASE_SYSTEM_DMG")/BaseSystem.chunklist"
+        fi
     else
         msg_error "Could not find BaseSystem.dmg in $MNT_ESD"
     fi
